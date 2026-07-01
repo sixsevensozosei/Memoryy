@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>m e m o r y</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #b0b5b3;
+            font-family: "Courier New", Courier, monospace; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color 1s ease;
+        }
+
+        /* --- RETRO LOADING SCREEN --- */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s ease, visibility 1s ease;
+            cursor: pointer;
+        }
+
+        #loadingScreen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: #111111;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .progress-container {
+            width: 260px;
+            height: 24px;
+            border: 4px solid #111111;
+            padding: 2px;
+            background: #ffffff;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #111111;
+            transition: width 0.1s linear;
+        }
+
+        /* --- CARD UI --- */
+        .card {
+            background: #ffffff;
+            width: 340px;
+            height: 460px;
+            border: 4px solid #111111;
+            box-shadow: 8px 8px 0px #111111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+
+        /* Hellmari Blue Room State Transformation */
+        body.hellmari-mode {
+            background-color: #040926 !important;
+        }
+
+        .card.hellmari-mode {
+            background: #0d133a !important;
+            border: 4px solid #4d5fff !important;
+            box-shadow: 8px 8px 0px #4d5fff !important;
+        }
+
+        .card.hellmari-mode h1, 
+        .card.hellmari-mode p {
+            color: #4d5fff !important;
+            text-shadow: 0 0 5px rgba(77, 95, 255, 0.6);
+            position: relative;
+            z-index: 10; 
+        }
+
+        .card.hellmari-mode .cursor {
+            background-color: #4d5fff !important;
+        }
+
+        /* --- ACCURATE 'SOMETHING' GHOST LAYER --- */
+        .mari-ghost {
+            position: absolute;
+            width: 130px;
+            height: 240px;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0; 
+            transition: opacity 2.5s ease-in-out; 
+            pointer-events: none;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card.hellmari-mode .mari-ghost {
+            opacity: 0.18; /* Slightly more distinct details */
+        }
+
+        /* Long hair shroud base shape */
+        .mari-hair {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            border-radius: 55% 55% 0 0;
+            position: relative;
+            /* Creates the accurate multi-pointed drop look at the bottom */
+            clip-path: polygon(0% 0%, 100% 0%, 90% 75%, 75% 50%, 50% 100%, 25% 50%, 10% 75%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The blank face backdrop wrapper inside the hair context */
+        .mari-face {
+            position: absolute;
+            top: 22%;
+            width: 32px;
+            height: 52px;
+            background-color: #ffffff; /* Stark white eye socket base */
+            border-radius: 50% 50% 50% 50%;
+            transform: rotate(0deg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        /* The standalone, single vertical pupil centering the socket */
+        .mari-eyes {
+            width: 16px;
+            height: 16px;
+            background-color: #000000; /* Dark black void center eye */
+            border-radius: 50%;
+        }
+
+        /* --- PRESENT ICON --- */
+        .icon-wrapper {
+            margin-bottom: 35px;
+        }
+
+        .present-icon {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #111111;
+            background-color: #ffffff;
+            position: relative;
+        }
+
+        .present-icon::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: 6px;
+            height: 100%;
+            background-color: #111111;
+        }
+        .present-icon::after {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background-color: #111111;
+        }
+
+        h1 {
+            font-size: 1.15rem;
+            color: #111111;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #111111;
+            line-height: 1.6;
+        }
+
+        .prompt-text {
+            color: #777777;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        .spam-143 {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            line-height: 1.8;
+            opacity: 0.7;
+            margin-top: 15px;
+            word-wrap: break-word;
+        }
+
+        .cover {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.4s ease;
+            width: 100%;
+        }
+
+        .message {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            padding: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .card.open .cover {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .card.open .message {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background-color: #111111;
+            margin-left: 4px;
+            animation: blink 0.8s steps(2, start) infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            to { visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen">
+        <div class="loading-text" id="loadText">CLICK TO START LOG...</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <audio id="finalDuet" src="final-duet.mp3" loop></audio>
+
+    <div class="card" id="valentineCard">
+        <div class="mari-ghost">
+            <div class="mari-hair">
+                <div class="mari-face">
+                    <div class="mari-eyes"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cover">
+            <div class="icon-wrapper">
+                <div class="present-icon"></div>
+            </div>
+            <h1>A birthday memory...</h1>
+            <p class="prompt-text">Do you want to check inside the box?</p>
+            <p class="prompt-text" style="margin-top: 40px; font-style: italic;">[ Click to open ]</p>
+        </div>
+
+        <div class="message">
+            <h1 id="textHeading"></h1>
+            <p id="textBody"></p>
+            <p id="spamContainer" class="spam-143"></p>
+        </div>
+    </div>
+
+    <script>
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadText = document.getElementById('loadText');
+        const progressBar = document.getElementById('progressBar');
+        const card = document.getElementById('valentineCard');
+        const bgAudio = document.getElementById('finalDuet');
+        
+        const headingElement = document.getElementById('textHeading');
+        const textElement = document.getElementById('textBody');
+        const spamElement = document.getElementById('spamContainer');
+
+        const part1 = {
+            heading: "HAPPY BIRTHDAY!",
+            body: "Everything is going to be okay. Thank you for being born, and thank you for being such an amazing part of my life. I hope today brings you as much joy as you give me. ♥"
+        };
+
+        const part2 = {
+            heading: "STAY BY MY SIDE...",
+            body: "You mean the world to me, and having had you by my side for the almost 3 years of our shared life together means everything to me."
+        };
+
+        const part3 = {
+            heading: "I LOVE YOU.",
+            body: "143. 143. 143."
+        };
+
+        let musicStarted = false;
+        let cardOpened = false;
+        const typingSpeed = 40; 
+        const totalLoadTime = 20000; 
+
+        // 1. CLICK TO START LOADING & PLAY MUSIC
+        loadingScreen.addEventListener('click', function() {
+            if (!musicStarted) {
+                musicStarted = true;
+                loadText.innerHTML = "LOADING MEMORY...";
+                
+                bgAudio.play();
+
+                let startTime = Date.now();
+                let progressInterval = setInterval(function() {
+                    let elapsedTime = Date.now() - startTime;
+                    let percentage = Math.min((elapsedTime / totalLoadTime) * 100, 100);
+                    progressBar.style.width = percentage + "%";
+
+                    if (elapsedTime >= totalLoadTime) {
+                        clearInterval(progressInterval);
+                        loadingScreen.classList.add('fade-out');
+                    }
+                }, 100);
+            }
+        });
+
+        // 2. CLICK THE PRESENT TO START THE STORY
+        card.addEventListener('click', function() {
+            if (!card.classList.contains('open')) {
+                card.classList.add('open');
+                
+                if (!cardOpened) {
+                    cardOpened = true;
+                    runTimeline();
+                }
+            }
+        });
+
+        function runTimeline() {
+            typeText(part1.heading, part1.body, function() {
+                setTimeout(function() {
+                    clearText();
+                    
+                    typeText(part2.heading, part2.body, function() {
+                        setTimeout(function() {
+                            clearText();
+                            
+                            // Visual Hellmari Blue Room Glitch Trigger
+                            document.body.classList.add('hellmari-mode');
+                            card.classList.add('hellmari-mode');
+                            
+                            typeText(part3.heading, part3.body, function() {
+                                setTimeout(spam143, 300);
+                            });
+                        }, 5000);
+                    });
+                }, 4000);
+            });
+        }
+
+        function typeText(hText, bText, onComplete) {
+            let hIndex = 0;
+            let bIndex = 0;
+            headingElement.innerHTML = "";
+            textElement.innerHTML = "";
+
+            function typeH() {
+                if (hIndex < hText.length) {
+                    headingElement.innerHTML += hText.charAt(hIndex);
+                    hIndex++;
+                    setTimeout(typeH, typingSpeed);
+                } else {
+                    textElement.innerHTML = '<span class="cursor"></span>';
+                    setTimeout(typeB, 500);
+                }
+            }
+
+            function typeB() {
+                if (bIndex < bText.length) {
+                    const current = bText.substring(0, bIndex + 1);
+                    textElement.innerHTML = current + '<span class="cursor"></span>';
+                    bIndex++;
+                    setTimeout(typeB, typingSpeed);
+                } else {
+                    if (typeof onComplete === "function") onComplete();
+                }
+            }
+            typeH();
+        }
+
+        function clearText() {
+            headingElement.innerHTML = "";
+            textElement.innerHTML = "";
+        }
+
+        let spamCount = 0;
+        function spam143() {
+            if (spamCount < 40) { 
+                spamElement.innerHTML += "143 ";
+                spamCount++;
+                setTimeout(spam143, 30); 
+            }
+        }
+    </script>
+</body>
+</html>
